@@ -1,0 +1,590 @@
+% !TeX TXS-program:compile = txs:///pdflatex/[--shell-escape]
+\documentclass[landscape,a4paper]{article}
+\usepackage[table]{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,arrows,fit,calc,graphs,graphs.standard}
+\usepackage[nosf]{kpfonts}
+\usepackage[t1]{sourcesanspro}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\usepackage[top=0.5mm,bottom=1mm,left=1mm,right=1mm]{geometry}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{hhline}
+\usepackage{makecell}
+\usepackage{mathtools}
+\usepackage{subfig}
+\usepackage{listings}
+\usepackage{soul}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+
+\graphicspath{ {./imgs/} }
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\definecolor{myblue}{cmyk}{1,.72,0,.38}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\renewcommand{\baselinestretch}{.8}
+\pagestyle{empty}
+
+\let\counterwithout\relax
+\let\counterwithin\relax
+\usepackage{chngcntr}
+\usepackage{verbatim}
+\usepackage{etoolbox}
+\makeatletter
+\preto{\@verbatim}{\topsep=0pt \partopsep=0pt }
+\makeatother
+
+\counterwithin*{equation}{section}
+\counterwithin*{equation}{subsection}
+\usepackage{enumitem}
+\newlist{legal}{enumerate}{10}
+\setlist[legal]{label*=\arabic*.,leftmargin=3mm}
+\setlist[itemize]{leftmargin=3mm}
+\setlist[enumerate, 1]{leftmargin=3.5mm}
+\setlist{nosep}
+
+\newenvironment{descitemize} % a mixture of description and itemize
+{\begin{description}[leftmargin=*,before=\let\makelabel\descitemlabel]}
+	{\end{description}}
+\newcommand{\descitemlabel}[1]{%
+	\textbullet\ \textbf{#1}%
+}
+\makeatletter
+
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+	{.2ex}%
+	{.2ex}%x
+	{\color{myblue}\sffamily\scriptsize\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{1}{0mm}%
+	{.2ex}%
+	{.2ex}%x
+	{\sffamily\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{1}{0mm}%
+	{.2ex}%
+	{.2ex}%x
+	{\rmfamily\bfseries}}
+
+\makeatother
+\setlength{\parindent}{0pt}
+% Remove belowskip of minted
+\setlength\partopsep{-\topsep}
+
+\newcolumntype{a}{>{\hsize=1.5\hsize}X}
+\newcolumntype{b}{>{\hsize=.25\hsize}X}
+
+\setlength\columnsep{10pt}
+\setlength\columnseprule{0pt}
+\begin{document}
+	\abovedisplayskip=0pt
+	\abovedisplayshortskip=0pt
+	\belowdisplayskip=0pt
+	\belowdisplayshortskip=0pt
+%	\scriptsize
+	\tiny
+	\begin{multicols*}{4}
+	\section{Intro to ML}
+		\subsection{ML Pipeline}
+		\subsubsection{Definition of Models}
+		\begin{itemize}
+			\item Model can refer to equations (linear/non-linear), code/rules, Neural networks, decision trees, bayesian graph, Deep NN
+			\item In simple terms, model defines a function that maps inputs to outputs and is mostly mathematical equations
+		\end{itemize}
+		\subsubsection{Machine Learning Pipeline}
+		Machine learning follows an iterative pipeline in the following order: 
+		
+		$\newline$
+		Data collection $\rightarrow$ Data Extraction $\rightarrow$ Data pre-processing $\rightarrow$ Model choice/design $\rightarrow$ Model training $\rightarrow$ Model validation (evaluation) $\rightarrow$ Model understanding (explainability) $\rightarrow$ Model deployment
+		\section{Paradigms of ML}
+		\subsection{Classes of ML techniques}
+		\begin{enumerate}
+			\item \textbf{Supervised learning}
+			\begin{itemize}
+				\item Given a set of data features and labels, design an algorithm that predicts label for
+				new data (never observed before).
+				\item Regression task: e.g. predict price (continuous value) of houses given existing data label (house size)
+				\item Classification task (binary): e.g. predict (discrete value) whether benign or malignant tumor based on tumor size
+				\item Classification task (multiple classes): e.g. predict class of disease given size of tumor
+				\item Classification task (multi-feature)
+			\end{itemize}
+			\item \textbf{Unsupervised learning}
+			\begin{itemize}
+				\item In supervised learning, data and label always comes in a pair but in unsupervised learning, it is likely that we do not have label or any additional information
+				\item The goal is to find structure in data that solves tasks like clustering, classification, compression and generative model
+			\end{itemize}
+			\item \textbf{Reinforcement learning} (not tested)
+			\begin{itemize}
+				\item Learns a sequence of actions that maximizes a reward
+				\item RL agents learns to plan the future to win
+				\item Main issue is that lots of data is required because reward is sparse (e.g. whole chess game must be played to get a score of +1, -1 or 0)
+			\end{itemize}
+			\item \textbf{Self-supervised learning} (not tested)
+		\end{enumerate}
+		\subsection{Supervised Learning with kNN}
+		\begin{itemize}
+			\item Goal is to estimate a function $f$ such that $y=f_\theta(x)$
+			\begin{itemize}
+				\item $x$ is a raw data point
+				\item $y$ is the label (either a real number for regression task or categorical variable for classification task)
+				\item $\theta$ are the parameters of the predictive function
+			\end{itemize}
+			\item $y$ is annotated by humans which is extremely time consuming, expensive, biased and is limited to human knowledge
+		\end{itemize}
+		\subsubsection{Difference between kNN, Decision tree, SVM}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{diff_sl_models}
+		\end{center}
+		\subsubsection{k-Nearest-Neighbor}
+		\begin{itemize}
+			\item Assumes that close data points have similar labels 
+			\item Basic Algorithm to predict the label of a new data point x*:
+			\begin{enumerate}
+				\item Find the closest $k$ data points in the training set, $S=\{(x_i,y_i)_{i=1:N}\}$
+				\item Assign the label of the \textbf{mean/mode} to the new data point
+			\end{enumerate}
+			\item Distance metric:
+			\begin{enumerate}
+				\item L2/Euclidean distance
+				\item L1/Manhatten distance
+				\item Cosine distance (angle)
+				\item Jaccard distance (sets)
+			\end{enumerate}
+			\item \textcolor{red}{Larger the value of $k$, the more smooth the decision boundary, less overfitting}
+			\item Hyper-parameter $k$ acts as regularizer which increases robustness (new \& similar input used, output is same) of predictor
+			\item Terrible at high-dimensionality since data points sampled from random distribution will have about the same distance from each other (\textcolor{red}{curse of dimensionality})
+			\item Performs well for few number of meaningful features
+			\item \textcolor{red}{Can be used for both regression and classification tasks}
+		\end{itemize}
+		\subsubsection{Time Complexity of kNN}
+		\begin{itemize}
+			\item No training needed
+			\item O($n\cdot d$) for nearest neighbor and O($n\cdot d \cdot k$) for kNN
+			\begin{itemize}
+				\item $n$ = number of training data points
+				\item $d$ = number of data features
+				\item $k$ = number of nearest neighbor
+			\end{itemize}
+			\item High memory usage as all training data is loaded into memory
+			\item k-d tree and hashing techniques to speed up
+		\end{itemize}
+		\subsubsection{Curse of Dimensionality vs Blessing of Structure}
+		\begin{itemize}
+			\item Curse of dimensionality states that if points were \textbf{chosen randomly}, distance between them are about equal $\rightarrow$ kNN will not work well
+			\item Blessing of structure instead says that \textbf{real world data is unlikely to be randomly distributed} and have structures like edges or textures (for images)
+			\begin{itemize}
+				\item This brings down dimensionality of data to be $< R^d$
+			\end{itemize}
+		\end{itemize}
+		\subsubsection{Pros and Cons of kNN}
+		\begin{itemize}
+			\item Extremely simple and expressive (can produce non-linear boundary decision)
+			\item As $n\rightarrow\infty$, kNN is provably very accurate but requires huge amount of space
+			\item As $d\rightarrow\infty$, kNN fails due to curse of dimensionality
+		\end{itemize}
+		\section{Decision Trees}
+		\subsection{Motivation of kd-tree}
+		\begin{itemize}
+			\item kNN is extremely slow and time consuming when we use a large $n$ since we \textbf{need to compute distance to all of the points} each time we make a query
+			\item Want a way to \textbf{prune away points} that we know are extremely far away to cut computation time
+		\end{itemize}
+		\columnbreak
+		\subsection{How kd-tree works}
+		\subsubsection{Tree Construction}
+		\begin{enumerate}
+			\item Split recursively in half along each feature dimension
+			\begin{itemize}
+				\item We want to have about the same data points at each side of the split for max efficiency
+				\item Which direction we choose to split first is chosen greedily
+			\end{itemize}
+			\item Iterate over all feature dimensions 
+			\item End up with a depth of $O(\log_2n)$
+		\end{enumerate}
+		* In general, number of partition is about $2^d$ to capture largest variation of data
+		\subsection{Searching k-d tree}
+		\begin{enumerate}
+			\item Given a point $x$, identify which set $x$ lies in and find the closest neighbor in that set, $x_{NN}$
+			\item Compute distance $d(x,C)$, where $C$ is the cut
+			\item If $d(x, C) > d(x, x_{NN})$, discard everything that is in the set of the cut, else find nearest neighbor in the other set of the cut
+			\item Repeat for all cuts
+		\end{enumerate}
+		\subsection{Complexity of k-d tree}
+		\begin{itemize}
+			\item Space complexity of k-d tree: $O(2^p)\rightarrow O(n)$, where $p=O(\log_2n)$
+			\item Time complexity to build k-d tree: $O(n\log_2 n)$
+			\item Inference speed: 
+			\begin{itemize}
+				\item Best case: $O(\log_2n+d)$
+				\item Worst case: $O(dn)$, basically nearest neighbor
+				\item Average case: $O(d\log n)$
+			\end{itemize}
+		\end{itemize}
+		\subsection{Pros and cons of k-d tree}
+		\begin{itemize}
+			\item Pros:
+			\begin{itemize}
+				\item Exact kNN but no need to backtrack in parent nodes
+				\item Easy to implement
+				\item Average inference much faster than kNN, $O(d\log_2n)$ vs $O(dn)$
+			\end{itemize}
+			\item Cons:
+			\begin{itemize}
+				\item Cuts are axis aligned $\rightarrow$ not good in high dimensionality
+			\end{itemize}
+		\end{itemize}
+		\subsection{Decision trees}
+		\begin{itemize}
+			\item kNN requires full training data to make prediction
+			\item k-d tree uses the fact that data concentrate in regions to speed things up
+			\item Ultimately, goal is not to find closest data points but to get a classification or regression value
+			\begin{itemize}
+				\item e.g. If new data point falls in cluster of 1000 +ve points, can just classify as +ve without calculating distance
+				\item Want to leverage the idea of clustering so that \textbf{no need to load full training set}
+			\end{itemize}
+		\end{itemize}
+		\subsubsection{Inference using Decision Tree}
+		\begin{itemize}
+			\item Once tree constructed, don't need to keep training set in memory
+			\item Only need to store \textbf{tree structure} ($O(\log_2n)$ depth) as well as \textbf{class probability/regression value/class label} in leaf nodes
+			\item Inference is extremely fast at $O(\log_2n)$, \textcolor{red}{independent of d}
+		\end{itemize}
+		\subsubsection{Optimal decision tree}
+		\begin{itemize}
+			\item In theory if no 2 data points have same features but different labels, we can ensure min depth 
+			\item In practice, finding minimum size tree is NP-hard
+			\item Compromise is to \textbf{minimize a function that measures label purity}
+		\end{itemize}
+		\subsubsection{Purity}
+		\begin{itemize}
+			\item Purity is defined as the fraction of data with label $k$ in a set, $p_k=\frac{|S_k|}{|S|}$
+			\item Worst case is when all leaves are random prediction, i.e. $p_k=\frac{1}{c}, \forall k$, where $c$ is the number of classes
+			\item Want to maximize Kullback-Leiber distance between random prediction and best candidate $p$
+		\end{itemize}
+		\subsubsection{Entropy}
+		\begin{itemize}
+			\item Maximizing KL distance is equivalent to minimizing entropy
+			\item If probability of each class is equal, then entropy is at its maximum
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.4\columnwidth]{entropy}
+		\end{center}
+		\begin{itemize}
+			\item Entropy $H=-\sum p_k\log p_k$
+			\item Ideally, entropy of L and R should be less than S, i.e. $H(L), H(R) < H(S)$
+		\end{itemize}
+		\subsubsection{Information Gain}
+		\begin{itemize}
+			\item Information gain (IG) is the difference between the entropy of the original set $S$ and
+			the weighted sum of the entropy of the subset $S_k$ $$IG(S,S_1,\cdots,S_c)=H(S)-H(S_1,\cdots,S_c)=H(S)-\sum_{k=1}^{c}p(S_k)H(S_k)$$
+		\end{itemize}
+		\subsubsection{Construction of Decision Tree}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{decision_tree_construction}
+		\end{center}
+		\subsection{Regression tree}
+		\begin{itemize}
+			\item It is \textbf{easy to extend decision trees to regression trees} as long as a purity function can be defined for the new task
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{regression_tree}
+		\end{center}
+		\subsubsection{Complexity of Regression Tree}
+		\begin{itemize}
+			\item Regression tree space, time and inference complexity all follows that of k-d tree
+		\end{itemize}
+		\subsection{Bagging}
+		\begin{itemize}
+			\item Decision trees are extremely fast but have \textcolor{red}{high variance}, i.e. weak learners
+			\item \textbf{High variance}: quality of the classification/regression solutions vary significantly
+		\end{itemize}
+		\subsubsection{Bias and Variance}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{bias_variance}
+		\end{center}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{formalized_bias_variance}
+		\end{center}
+		\subsubsection{Reducing Variance}
+		\begin{itemize}
+			\item Most common way to reduce variance is to take average of several solution, i.e. \textcolor{red}{ensembling}
+			\item Relies on the \textbf{law of large numbers} where the average of many small predictors will tend to the average of the true predictor
+			\item However this requires us to have access to more training sets which in most cases we do not have
+		\end{itemize}
+		\subsubsection{Bagging algorithm}
+		\begin{enumerate}
+			\item Sample $m$ datasets $S_1,..,S_m$ from original $S$ \textbf{with replacement}
+			\item For each training set $S_j$, train a classifier $f_{S_j}$
+			\item Final ensemble classifier is $\hat{f}(x)=\frac{1}{m}\sum_{j=1}^{m}f_{S_j}(x)$
+		\end{enumerate}
+		* Note that \textcolor{red}{sampling with replacement breaks the assumption of independent and identically distributed} (i.i.d) data and therefore does not have \textbf{theoretical guarantee} that the ensemble will give a good estimation of the true mean actual predictor
+		\subsubsection{Advantages of bagging}
+		\begin{itemize}
+			\item In practice, bagging reduces variance quite effectively, but after a large number $m$, will have diminishing returns
+			\item Bagging can \textbf{reduce the variance without increasing the error} of an unbiased
+			classifier
+		\end{itemize}
+		\subsubsection{Random forests}
+		\begin{itemize}
+			\item One of the most popular and useful bagging algorithms
+			\item Random forest is an ensemble of decision trees
+			\item Hyper-parameters: $k=\sqrt{d}$
+		\end{itemize}
+		\subsubsection{Boosting}
+		\begin{itemize}
+			\item Boosting is used to help \textcolor{red}{reduce bias} on weak learners such as decision trees with limited depth
+			\item Uses the idea of ensembling which combines large number of weak learners to generate a strong learner with low bias
+			\item Note that both \textcolor{red}{boosting and bagging are both agnostic to algorithm used} 
+		\end{itemize}
+		\section{Linear Models}
+		\subsection{Applications of Linear Models}
+		\begin{enumerate}
+			\item \textbf{Classification}: sign$(\theta^Tx)$, $y=\pm 1$, e.g. Approve or reject
+			\item \textbf{Regression}: $\theta^Tx$, $y\in\mathbb{R}$, e.g. Amount of credit
+			\item \textbf{Logistic regression}: sigmoid$(\theta^Tx)$, $y\in[0,1]$, e.g. probability of defaulting
+		\end{enumerate}
+		\subsection{Equation of Linear Model}
+		\begin{itemize}
+			\item $f_\theta(x)=\theta^Tx=\sum_{i=1}^{d}\theta_ix_i$, where $\theta_i$ is the weight/importance of feature $x_i$
+			\item Linear classification:$ \begin{cases}
+				\theta^Tx > 0\Rightarrow +1\\
+				\theta^Tx < 0\Rightarrow -1
+			\end{cases}$
+			\item Linear regression: $\theta^Tx\Rightarrow$ Amount (scalar)
+		\end{itemize}
+		\subsection{Loss function}
+		$$\text{L}(\theta)=\frac{1}{n}\sum_{j=1}^{n}(f_\theta(x^j)-y^j)^2 \text{ -- Mean squared error}$$
+		where $f_\theta(x^j)$ is the predicted value from the model and $y^j$ is the actual labeled value
+		$\newline$
+		\begin{itemize}
+			\item Goal of models is to choose a $\theta$ that \textbf{minimizes} the mean squared error
+		\end{itemize}
+		\subsection{Finding best $\theta$}
+		\begin{itemize}
+			\item Mainly uses 2 approaches: \textbf{Normal equations} and \textbf{Gradient descent}
+			\item Normal equation solution (\textcolor{red}{only for linear regression}): 
+			$$ \theta=\left((X^TX)^{-1}X^T\right)y $$ where $(X^TX)^{-1}X^T$ is known as the pseudo-inverse of X and is \textbf{computationally expensive to compute if $n$ or $m$ is large}
+		\end{itemize}
+		\subsubsection{Gradient Descent}
+		\begin{itemize}
+			\item Works in high-dimensional spaces, convergence \textcolor{red}{independent of data dimensionality $d$}
+			\item Steps to carry out gradient descent
+			\begin{enumerate}
+				\item Start at a random $\theta(t)$
+				\item At each step, update the value of parameter: $\theta(t+1)=\theta(t)+v$, where $v$ is the opposite direction of the greatest +ve gradient
+				\item Stop when gradient < arbitrary threshold
+			\end{enumerate}
+			\item $v=-\eta\frac{\partial L}{\partial\theta}(\theta(t))$, where $\eta$ is the step size
+			\begin{itemize}
+				\item No good way to find the right step size, just have to try a few values and pick best one
+			\end{itemize}
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{gradient_descent}
+		\end{center}
+		\subsubsection{Stochastic Gradient Descent}
+		\begin{itemize}
+			\item Main problem with gradient descent is that there are \textbf{lots of saddle points / flat regions in high dimensional spaces}
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{stochastic}
+		\end{center}
+		\subsubsection{Gradient Descent vs Normal Equation}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{gd_vs_normal}
+		\end{center}
+		\subsection{Logistic Regression}
+		\begin{itemize}
+			\item Used to \textbf{predict probability} e.g. probability of heart attack, given training data of person's health information and whether they have a heart attack
+			\item $P_\theta(y|x)=\begin{cases}
+				f_\theta(x) &\text{for y = +1}\\
+				1-f_\theta(x) & \text{for y = -1}
+			\end{cases}$
+			\item Goal is to minimize cross-entropy loss (a.k.a. log loss):
+			$$ min_\theta L(\theta)=\frac{1}{n}\sum_{j=1}^{n}\log(1+\exp(-y^j\theta^Tx^j)) $$ where $n$ is the number of training data
+		\end{itemize}
+		\subsection{Support Vector Machine (SVM)}
+		\begin{itemize}
+			\item Goal of SVM is to find a linear separator that partitions the feature space into 2 regions 
+		\end{itemize}
+		\begin{minipage}{0.35\columnwidth}
+			\begin{center}
+				\includegraphics[width=1\columnwidth]{svm}
+			\end{center}
+		\end{minipage}
+		\begin{minipage}{0.4\columnwidth}
+			\begin{itemize}
+				\item We want margin $d$ to be \textbf{as large as possible} to generalize to more data points
+				\item $d=\frac{2}{||\theta||}$
+			\end{itemize}
+		\end{minipage}
+		\subsubsection{Soft-margin SVM}
+		\begin{itemize}
+			\item Aims to solve the problem that real-world data is typically \textbf{non-linearly separable} due to outliers $\rightarrow$ no mathematical solution to SVM
+			\item Idea is to \textbf{introduce a slack variable} $e(j)$ for each data point that represents the prediction error
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{soft_svm}
+		\end{center}
+		\begin{itemize}
+			\item Soft-margin \textbf{penalizes misclassifications and correct classifications that fall within margin}
+			\item Typically would have a \textbf{much smaller margin} than standard SVM
+			\item Uses hinge loss function:
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{hinge-loss}
+		\end{center}
+		\subsection{Kernel SVM}
+		\begin{itemize}
+			\item Linear models are limited to \textbf{linearly separable data points} $\rightarrow$ cannot handle complex/non-linear data sets
+			\item To use a linear kernel, one must first map data from original space $R^d$ to a higher dimensional space $R^b, b>>d$ so that the classes can be distinguished using linear functions
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{kernel_svm}
+		\end{center}
+		\section{Bias \& Variance}
+		\subsection{Definition of Bias, Variance and Noise}
+		\begin{itemize}
+			\item Bias: \textbf{intrinsic} error/difference between the average prediction model and the true regression value. \textcolor{red}{Inherent to the model and independent of data}. Also known as \textbf{model error} $$Bias(\mathcal{H})=\mathbb{E}(\mathcal{H})-Y$$
+			\item Variance: captures how much the learner changes when it is
+			computed on different training sets. Indicates \textbf{expressivity}$\rightarrow$ complex algo have high expressivity $$Var(\mathcal{H}) = \mathbb{E}[f-\mathbb{E}(\mathcal{H})^2] \text{, where} f\in \mathcal{H} $$ 
+			\item Noise: ambiguity inherent to the data distribution and feature representation. \textcolor{red}{Impossible to get rid of} and is often modeled as a stochastic process that is added to "clean" data
+			\item Good hypothesis has low bias and variance 
+			\begin{itemize}
+				\item To compare between 2 models, just add their bias and variance and compare the sum, lower the better
+			\end{itemize}
+		\end{itemize}
+		\subsection{Bias-Variance-Error Decomposition}
+		\begin{center}
+			\includegraphics[width=0.9\columnwidth]{bias_variance_error}
+		\end{center}
+		\begin{itemize}
+			\item Most fundamental equation of supervised learning known as the \textcolor{red}{bias-variance-error trade off}
+		\end{itemize}
+		\subsection{Over/Under Fitting}
+		\begin{itemize}
+			\item Over-fitting: Occurs when learner $f_D(x)$ has zero prediction error on a training set $D$, but have large test error
+			\begin{itemize}
+				\item Learner is too expressive and will become over-specialized of the training
+				data, unable to extrapolate to unseen data.
+				\item Typically have high variance to capture complexity of whole dataset
+			\end{itemize}
+			\item Under-fitting: learner $f_D(x)$ which is not able to predict correctly a training set $D$ (very unlikely to happen), have both \textbf{high training and test error}
+			\begin{itemize}
+				\item Learner is not expressive enough. It will make error on the provided
+				training set, i.e. unable to benefit from all information present in the training data
+				\item Typically have no enough variance/complexity $\rightarrow$ just using a simple algorithm
+			\end{itemize}
+		\end{itemize}
+		\subsection{Bias-Variance Trade-off}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{bias_variance-tradeoff}
+		\end{center}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{bias_variance-tradeoff2}
+		\end{center}
+		\subsection{How to reduce variance and bias}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{reduce-var-bias}
+		\end{center}
+		\section{Overfitting Regularization}
+		\subsection{Loss Regularization}
+		\begin{itemize}
+			\item Method to \textbf{reduce overfitting} by \textcolor{red}{decreasing expressivity }of model (e.g. from 10th order to 2nd order function)
+			\item Typically use Regularization with stochastic gradient descent $\rightarrow$ SGD speeds up gradient descent and also regularizes predictive function (w.r.t. $\theta$), allowing for better generalization
+			\item Uses the concept of \textbf{constraint optimization with soft constraints}, basically saying that we are setting the $\theta_3,\theta_4,\cdots,\theta_n$ of a hypothesis space $\mathcal{H}=\theta_1+\theta_2x+\theta_3x^2+\cdots+\theta_nx^{n-1}$ to $\leq C$
+			\begin{equation}\label{constrained}
+				\min_\theta L_\theta\text{ such that }\sum_{j=0}^{d}\theta_j^2=\theta^T\theta\leq C, C > 0
+			\end{equation}
+			\item If $C$ is small $\rightarrow$ $\theta_{j\geq3}\approx0$, i.e. $\mathcal{H}_{10}=\mathcal{H}_2$
+			\item If $C$ is large, then basically doing unconstrained optimization (MSE) 
+		\end{itemize}
+		\subsection{Relationship between constraint regularized problem and unconstrained optimization problem}
+		\begin{itemize}
+			\item For every general constraint regularized problem like in \eqref{constrained}, there exist and equivalent unconstrained optimization problem (\textbf{easier to solve}) 
+			\begin{equation} \label{unconstrained} \tag{2}
+				min_\theta L(\theta)+\lambda\theta^T\theta, \lambda>0
+			\end{equation}
+			\item For each value $C$, there exists a value $\lambda$ such that \eqref{constrained} $\equiv$ \eqref{unconstrained} (Lagrange multiplier), $C\propto\frac{1}{\lambda}$
+		\end{itemize}
+		\subsection{Original MSE loss vs Regularized MSE}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{reg-mse-vs-regularized-mse}
+		\end{center}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{graph-mse}
+		\end{center}
+		\subsection{L2 vs L1 regularization}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{l2-v-l1}
+		\end{center}
+		\subsection{Cross Validation}
+		\begin{itemize}
+			\item We need a surrogate of the test set to estimate the regularization parameter $\lambda$ which identifies
+			the right model complexity that minimizes the test error
+			\item Since we cannot touch data from the test set, we \textbf{split training set into training and validation set}
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{cross-validation}
+		\end{center}
+		\begin{itemize}
+			\item Estimation of error of validation set $L_{\text{val}}=L_{\text{test}}\pm O(\frac{1}{\sqrt{m}})$, where $m$ is the number of data points in validation set
+			\begin{itemize}
+				\item To have $L_{\text{val}}$ be as close to $L_{\text{test}}$, we want $m$ to be as large as possible so that error of validation step is a good representation of the actual test set
+				\item Typically $m$ is 20\% of training set
+			\end{itemize}
+		\end{itemize}
+		\subsubsection{Effects of $m$}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{effects-of-m}
+		\end{center}
+		\subsubsection{k-fold Cross Validation}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{k-fold}
+		\end{center}
+		\subsubsection{Early Stopping}
+		\begin{itemize}
+			\item Cross validation extremely computationally expensive 
+			\item To speed things up, we will stop optimization after $M$ number of gradient steps, \textbf{when the validation error starts increasing},
+			even if optimization has not converged yet
+		\end{itemize}
+		\section{Miscellaneous}
+		\subsection{Matrix Inverse}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{matrix-inverse}
+		\end{center}
+		\subsection{Matrix Dot Product}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{dot-product}
+		\end{center}
+		\subsection{Differentiation Nonsense}
+		\includegraphics[width=0.2\linewidth]{differentiation-formulas}\\
+		\includegraphics[width=0.5\linewidth]{differentiation-rules}
+		\subsection{Useful Equations}
+		\begin{center}
+			\includegraphics[width=0.7\columnwidth]{equations}
+		\end{center}
+		\subsection{When is ML not useful?}
+		\begin{enumerate}
+			\item the task is fully deterministic
+			\item there's a straightforward formula equating $x$ and $y$
+			\item the task demands different outputs every time, regardless of inputs (randomness)
+		\end{enumerate}
+		\subsection{kNN for Regression task}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{knn-regression}
+		\end{center}
+		\subsection{Logistic Regression as Binary Classification}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{log-as-binary}
+		\end{center}
+		\subsection{Types of noise}
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{noise-types}
+		\end{center}
+	\end{multicols*}
+\end{document}
